@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sensor Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif; 
+            padding: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-time Sensor Data</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>User ID</th>
+                <th>Device ID</th>
+                <th>pH</th>
+                <th>Temp (°C)</th>
+                <th>Moisture (%)</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody id="sensor-table-body">
+            <tr><td colspan="7">Loading...</td></tr>
+        </tbody>
+    </table>
+
+    <script src="renderer.js"></script>
+</body>
+</html>

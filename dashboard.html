@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sensor Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-6 font-sans">
+
+    <!-- Username Form -->
+    <div id="login-section" class="w-full max-w-md bg-white p-6 rounded-xl shadow-md mt-20">
+        <h2 class="text-2xl font-semibold mb-4 text-center">Enter Username</h2>
+        <form id="login-form" class="space-y-4">
+            <input type="text" id="username" placeholder="Username" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">Submit</button>
+        </form>
+    </div>
+
+    <!-- Sensor Table -->
+    <div id="dashboard-section" class="w-full max-w-6xl hidden mt-10">
+        <h1 class="text-3xl font-bold mb-6 text-center">Real-time Sensor Data</h1>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white shadow-md rounded-xl overflow-hidden">
+                <thead class="bg-blue-600 text-white">
+                    <tr>
+                        <th class="text-left px-6 py-3">ID</th>
+                        <th class="text-left px-6 py-3">User ID</th>
+                        <th class="text-left px-6 py-3">Device ID</th>
+                        <th class="text-left px-6 py-3">pH</th>
+                        <th class="text-left px-6 py-3">Temp (°C)</th>
+                        <th class="text-left px-6 py-3">Moisture (%)</th>
+                        <th class="text-left px-6 py-3">Date</th>
+                    </tr>
+                </thead>
+                <tbody id="sensor-table-body" class="text-gray-700">
+                    <tr><td colspan="7" class="text-center px-6 py-4">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('login-form');
+        const loginSection = document.getElementById('login-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+
+        loginForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            if (username !== '') {
+                // You can store or use the username here if needed
+                loginSection.classList.add('hidden');
+                dashboardSection.classList.remove('hidden');
+
+                // Trigger data fetch or table update here
+                // Example: fetchSensorData(username);
+            }
+        });
+    </script>
+
+    <!-- Include your data rendering script -->
+    <script src="renderer.js"></script>
+</body>
+</html>
