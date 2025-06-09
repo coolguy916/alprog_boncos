@@ -68,7 +68,6 @@ cd alprog_boncos
 npm install
 ```
 
-
 3. Set Up the Database
 Ensure you have MySQL running.
 
@@ -84,12 +83,16 @@ DB_NAME=sensor_app
 4. Run the Application
 npm start
 
+---
+
 🗃️ Database Schema
 | table                 | Description              |
 | --------------------- | ------------------------ |
 | `user_table`          | Associated user ID       |
 | `device_Table`        | Unique device identifier |
 | `Sensor_Table`        | pH sensor reading        |
+
+---
 
 📡 API Endpoints
 | Method | Endpoint       | Description                      |
