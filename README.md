@@ -87,9 +87,9 @@ npm start
 🗃️ Database Schema
 | table                 | Description              |
 | --------------------- | ------------------------ |
-| `user_id`             | Associated user ID       |
-| `device_id`           | Unique device identifier |
-| `Sensor Reading`      | pH sensor reading        |
+| `user_table`          | Associated user ID       |
+| `device_Table`        | Unique device identifier |
+| `Sensor_Table`        | pH sensor reading        |
 
 📡 API Endpoints
 | Method | Endpoint       | Description                      |
