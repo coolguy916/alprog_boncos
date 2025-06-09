@@ -85,13 +85,11 @@ DB_NAME=sensor_app
 npm start
 
 🗃️ Database Schema
-| Column                | Description              |
+| table                 | Description              |
 | --------------------- | ------------------------ |
 | `user_id`             | Associated user ID       |
 | `device_id`           | Unique device identifier |
-| `ph_reading`          | pH sensor reading        |
-| `temperature_reading` | Temperature in Celsius   |
-| `moisture_percentage` | Soil moisture percentage |
+| `Sensor Reading`      | pH sensor reading        |
 
 📡 API Endpoints
 | Method | Endpoint       | Description                      |
