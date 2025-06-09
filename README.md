@@ -98,3 +98,8 @@ npm start
 | GET    | `/sensor-data` | Fetch sensor data (with filters) |
 | PUT    | `/sensor-data` | Update existing sensor data      |
 | DELETE | `/sensor-data` | Delete sensor data               |
+
+🤝 Contributing
+@adjip.sp follow for more
+
+
