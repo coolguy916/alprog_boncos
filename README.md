@@ -30,6 +30,7 @@ This is an **Electron application** designed to read, store, and visualize senso
 ---
 
 ## 📂 File Structure
+```bash
 
 alprog_boncos/
 │
@@ -48,7 +49,7 @@ alprog_boncos/
 ├── view/ # All UI-related files (HTML, CSS, JS)
 ├── .env # Environment variables (DB credentials)
 ├── package.json # Project metadata and dependencies
-
+```
 
 ---
 
@@ -74,11 +75,12 @@ Ensure you have MySQL running.
 Create a database (e.g., sensor_app).
 
 Add your DB config to a .env file:
+```bash
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=yourpassword
 DB_NAME=sensor_app
-
+```
 4. Run the Application
 npm start
 
