@@ -63,12 +63,12 @@ Follow these steps to set up and run the project:
 git clone https://github.com/coolguy916/alprog_boncos.git
 cd alprog_boncos
 ```
-2. Install Dependencies
+### 2. Install Dependencies
 ```bash
 npm install
 ```
 
-3. Set Up the Database
+### 3. Set Up the Database
 Ensure you have MySQL running.
 
 Create a database (e.g., sensor_app).
@@ -80,7 +80,7 @@ DB_USER=root
 DB_PASSWORD=yourpassword
 DB_NAME=sensor_app
 ```
-4. Run the Application
+### 4. Run the Application
 npm start
 
 ---
