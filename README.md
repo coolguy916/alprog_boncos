@@ -1,68 +1,100 @@
 # alprog_boncos
 This is an Electron application designed to read, store, and visualize sensor data. It features real-time data monitoring, database integration, serial communication capabilities, and a user-friendly dashboard.
+# 🌱 Electron Sensor Dashboard
 
-🚀 Features
-Real-time Sensor Data Monitoring: Continuously tracks and displays sensor readings.
-Database Integration: Stores sensor data in a MySQL database for logging and analysis.
-Serial Communication: Communicates with serial devices like Arduino to receive sensor data.
-Express.js API: Provides a robust backend for seamless data handling.
-Interactive Dashboard: Visualizes sensor data through an intuitive and responsive user interface.
-User Authentication: Includes secure login and registration functionality for user management.
-💻 Tech Stack
-This project is built with a modern and powerful technology stack:
+This is an **Electron application** designed to read, store, and visualize sensor data. It features real-time monitoring, database integration, serial communication, and a user-friendly dashboard interface.
 
-Frontend: HTML, CSS, JavaScript, with UI components from Tailwind CSS and Bootstrap.
-Backend: Node.js with the Express.js framework.
-Database: MySQL, accessed using the mysql2 driver.
-Desktop Framework: Electron, for creating a cross-platform desktop application.
-Serial Communication: The serialport library enables communication with hardware devices.
-📂 File Structure
-Here’s an overview of the key files and directories in the project:
+---
 
-main.js: The main entry point for the Electron application, managing the application's lifecycle and windows.
-preload.js: A script that runs before the web page is loaded in the renderer process, used for secure Inter-Process Communication (IPC).
-index.html & dashboard.html: The core HTML files that define the structure of the user interface.
-controller/databaseController.js: Manages all database interactions, including inserting, retrieving, updating, and deleting sensor data.
-lib/database.js: Contains the logic for connecting to the database and executing queries.
-lib/serialCommunicator.js: Handles serial port communication, allowing the application to interface with hardware devices.
-view/: A directory containing all UI-related files, including HTML, CSS, and client-side JavaScript.
-🔧 Setup and Installation
-To get the project up and running, follow these steps:
+## 🚀 Features
 
-Clone the repository:
-Bash
+- **Real-time Sensor Data Monitoring**: Continuously tracks and displays sensor readings.
+- **Database Integration**: Stores sensor data in a MySQL database for logging and analysis.
+- **Serial Communication**: Interfaces with serial devices like Arduino to receive sensor data.
+- **Express.js API**: Robust backend to manage and serve sensor data.
+- **Interactive Dashboard**: Intuitive UI to visualize and interact with the data.
+- **User Authentication**: Secure login and registration for user management.
 
+---
+
+## 💻 Tech Stack
+
+| Layer         | Technology                                                                 |
+|---------------|----------------------------------------------------------------------------|
+| **Frontend**  | HTML, CSS, JavaScript, Tailwind CSS, Bootstrap                            |
+| **Backend**   | Node.js, Express.js                                                       |
+| **Database**  | MySQL with `mysql2` driver                                                |
+| **Desktop App** | Electron                                                                |
+| **Serial Communication** | `serialport` library                                          |
+
+---
+
+## 📂 File Structure
+
+alprog_boncos/
+│
+├── main.js # Main Electron process
+├── preload.js # Secure IPC preloader
+├── index.html # Login page
+├── dashboard.html # Dashboard UI
+│
+├── controller/
+│ └── databaseController.js # Handles DB CRUD operations
+│
+├── lib/
+│ ├── database.js # DB connection and query logic
+│ └── serialCommunicator.js # Serial communication logic
+│
+├── view/ # All UI-related files (HTML, CSS, JS)
+├── .env # Environment variables (DB credentials)
+├── package.json # Project metadata and dependencies
+
+
+---
+
+## 🔧 Setup and Installation
+
+Follow these steps to set up and run the project:
+
+### 1. Clone the Repository
+
+```bash
 git clone https://github.com/coolguy916/alprog_boncos.git
-Install dependencies:
-Bash
-
+cd alprog_boncos
+```
+2. Install Dependencies
+```bash
 npm install
-Set up the database:
-Make sure you have a MySQL server running.
-Create a database and update the connection details in a .env file at the root of the project.
-Run the application:
-Bash
+```
 
+
+3. Set Up the Database
+Ensure you have MySQL running.
+
+Create a database (e.g., sensor_app).
+
+Add your DB config to a .env file:
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=yourpassword
+DB_NAME=sensor_app
+
+4. Run the Application
 npm start
-🗃️ Database
-The application uses a MySQL database to store sensor data. The primary table is sensor_data, which includes columns for:
 
-user_id
-device_id
-ph_reading
-temperature_reading
-moisture_percentage
-The database.js file manages the database connection, while databaseController.js handles all CRUD (Create, Read, Update, Delete) operations.
+🗃️ Database Schema
+| Column                | Description              |
+| --------------------- | ------------------------ |
+| `user_id`             | Associated user ID       |
+| `device_id`           | Unique device identifier |
+| `ph_reading`          | pH sensor reading        |
+| `temperature_reading` | Temperature in Celsius   |
+| `moisture_percentage` | Soil moisture percentage |
 
 📡 API Endpoints
-The application exposes the following API endpoints for data management:
-
-POST /sensor-data: Inserts new sensor data into the database.
-GET /sensor-data: Retrieves sensor data based on specified filters.
-DELETE /sensor-data: Deletes sensor data.
-PUT /sensor-data: Updates existing sensor data.
-🤝 Contributing
-Contributions are welcome! If you have ideas for improvements or new features, please open an issue or submit a pull request.
-
-📜 License
-This project is licensed under the MIT License. See the package.json file for more details.
+| Method | Endpoint       | Description                      |
+| ------ | -------------- | -------------------------------- |
+| POST   | `/sensor-data` | Add new sensor data              |
+| GET    | `/sensor-data` | Fetch sensor data (with filters) |
+| PUT    | `/sensor-data` | Update existing sensor data      |
+| DELETE | `/sensor-data` | Delete sensor data               |
