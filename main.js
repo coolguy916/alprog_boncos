@@ -38,6 +38,7 @@ function createWindow() {
         width: 1000,
         height: 700,
         autoHideMenuBar: true,
+        fullscreen: true,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
@@ -45,24 +46,30 @@ function createWindow() {
         }
     });
 
-    mainWindow.loadFile('index.html');
+    mainWindow.loadFile(path.join(__dirname, 'view', 'dashboard', 'dashboard.html'));
+
     mainWindow.webContents.openDevTools();
+
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
-
-    // --- SERIAL COMMUNICATOR CONFIGURATION ---
+    // --- UPDATED SERIAL COMMUNICATOR CONFIGURATION ---
     const serialPortConfig = {
-        portPath: null,
-        baudRate: 9600,
+        portPath: null, 
+        baudRate: 9600, 
         lineDelimiter: '\r\n',
-        dataType: 'json-object',
-        dbTableName: 'sensor_data',
-        requiredFields: ['user_id', 'device_id']
+        dataType: 'json-object', 
+        dbTableName: 'sensor_data2',
+        requiredFields: [], 
+        fieldsToEncrypt: [] 
     };
 
     serialCommunicator = new SerialCommunicator(serialPortConfig, db, mainWindow);
-    serialCommunicator.connect();
+
+    // Wait a bit for window to load before connecting
+    setTimeout(() => {
+        serialCommunicator.connect();
+    }, 2000);
 }
 
 function setupExpressAPI() {
@@ -103,6 +110,7 @@ app.on('activate', () => {
         initializeApp(); // Or just createWindow() if DB connection is persistent
     }
 });
+
 // -------------------- IPC Handlers --------------------
 ipcMain.handle('get-users', async () => {
     try {
@@ -144,6 +152,50 @@ ipcMain.handle('get-data-by-filters', async (event, table, filters) => {
     try {
         const result = await db.getDataByFilters(table, filters);
         return { success: true, data: result };
+    } catch (err) {
+        return { success: false, error: err.message };
+    }
+});
+
+
+// -------------------- Serial Communication IPC Handlers --------------------
+ipcMain.handle('serial-send-data', async (event, data) => {
+    try {
+        if (serialCommunicator) {
+            serialCommunicator.sendData(data);
+            return { success: true };
+        } else {
+            return { success: false, error: 'Serial communicator not initialized' };
+        }
+    } catch (err) {
+        return { success: false, error: err.message };
+    }
+});
+
+ipcMain.handle('serial-get-status', async () => {
+    try {
+        if (serialCommunicator) {
+            return {
+                success: true,
+                connected: serialCommunicator.isConnected(),
+                portInfo: serialCommunicator.getPortInfo()
+            };
+        } else {
+            return { success: false, error: 'Serial communicator not initialized' };
+        }
+    } catch (err) {
+        return { success: false, error: err.message };
+    }
+});
+
+ipcMain.handle('serial-reconnect', async () => {
+    try {
+        if (serialCommunicator) {
+            await serialCommunicator.connect();
+            return { success: true };
+        } else {
+            return { success: false, error: 'Serial communicator not initialized' };
+        }
     } catch (err) {
         return { success: false, error: err.message };
     }
