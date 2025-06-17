@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="StorageApp.MainPage"
+             Title="Aplikasi Storage Barang">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="25" Padding="30,0" VerticalOptions="Center">
+
+            <!-- Header -->
+            <Label x:Name="WelcomeLabel" 
+                   Text="📦 Manajemen Storage Barang"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center" />
+
+            <!-- Form Input Barang -->
+            <Frame BackgroundColor="LightBlue" Padding="15">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="➕ Tambah Barang Baru" FontSize="18" FontAttributes="Bold"/>
+                    
+                    <Entry x:Name="NamaBarangEntry" 
+                           Placeholder="Nama Barang (contoh: Laptop Asus)"
+                           BackgroundColor="White"/>
+                    
+                    <Entry x:Name="KategoriEntry" 
+                           Placeholder="Kategori (contoh: Elektronik)"
+                           BackgroundColor="White"/>
+                    
+                    <Entry x:Name="JumlahEntry" 
+                           Placeholder="Jumlah (contoh: 5)"
+                           Keyboard="Numeric"
+                           BackgroundColor="White"/>
+                    
+                    <Entry x:Name="HargaEntry" 
+                           Placeholder="Harga (contoh: 8500000)"
+                           Keyboard="Numeric"
+                           BackgroundColor="White"/>
+                    
+                    <Button x:Name="TambahButton" 
+                            Text="🔄 Tambah ke Database"
+                            BackgroundColor="Green"
+                            TextColor="White"
+                            Clicked="OnTambahBarangClicked"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Tombol Ambil Data -->
+            <Frame BackgroundColor="LightGreen" Padding="15">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="📋 Ambil Data dari Database" FontSize="18" FontAttributes="Bold"/>
+                    
+                    <Entry x:Name="FilterKategoriEntry" 
+                           Placeholder="Filter Kategori (kosongkan untuk semua data)"
+                           BackgroundColor="White"/>
+                    
+                    <Button x:Name="AmbilDataButton" 
+                            Text="📥 Ambil Data Barang"
+                            BackgroundColor="Blue"
+                            TextColor="White"
+                            Clicked="OnAmbilDataClicked"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Status/Loading -->
+            <Label x:Name="StatusLabel" 
+                   Text="Siap untuk digunakan..."
+                   FontSize="14"
+                   TextColor="Gray"
+                   HorizontalOptions="Center"/>
+            
+            <ActivityIndicator x:Name="LoadingIndicator" 
+                               IsVisible="False"
+                               IsRunning="False"/>
+
+            <!-- Hasil Data -->
+            <Frame BackgroundColor="LightYellow" Padding="15" x:Name="HasilFrame" IsVisible="False">
+                <VerticalStackLayout>
+                    <Label Text="📊 Hasil Data:" FontSize="18" FontAttributes="Bold"/>
+                    <ScrollView HeightRequest="300">
+                        <Label x:Name="HasilLabel" 
+                               FontSize="12"
+                               BackgroundColor="White"
+                               Padding="10"/>
+                    </ScrollView>
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
