@@ -1,4 +1,4 @@
-# 📚 Dokumentasi API Backend - Panduan Pemula
+# 📚 Dokumentasi API Backend - Panduan Ngoding
 
 ## 🎯 Pengenalan
 API ini memungkinkan aplikasi mobile (MAUI) untuk berkomunikasi dengan database MySQL melalui internet. Seperti jembatan yang menghubungkan aplikasi dengan database.
