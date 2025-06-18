@@ -1616,7 +1616,7 @@ public class SignupViewModel : BaseViewModel
 </Project>
 ```
 
-## 🚀 Next Steps for Implementation
+## 🚀 Next Steps for Implementation VOL 2
 
 ### 1. **Database Integration Options**
 ```csharp
@@ -1688,4 +1688,868 @@ public class SyncService
 }
 ```
 
-This structure gives you a complete, production-ready .NET MAUI app that matches your GUI design and includes all the backend integration you need!
+# Complete .NET MAUI AlbonApp Deployment Guide
+
+## 🎯 Step 1: Project Setup & Initial Configuration
+
+### Create New Project
+```bash
+# Using .NET CLI
+dotnet new maui -n AlbonApp
+cd AlbonApp
+
+# Or use Visual Studio 2022 > Create New Project > .NET MAUI App
+```
+
+### Essential NuGet Packages
+```xml
+<!-- Add to AlbonApp.csproj -->
+<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+<PackageReference Include="System.Text.Json" Version="8.0.0" />
+<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+```
+
+## 🎯 Step 2: Complete File Structure Implementation
+
+### 2.1 Create Folder Structure
+```
+AlbonApp/
+├── Models/
+├── Services/
+├── ViewModels/
+├── Views/
+├── Converters/
+├── Resources/
+│   ├── Styles/
+│   └── Images/
+└── Platforms/
+```
+
+### 2.2 App.xaml - Application Entry Point
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<Application x:Class="AlbonApp.App"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:AlbonApp">
+    
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
+```
+
+### 2.3 App.xaml.cs - Application Logic
+```csharp
+using AlbonApp.Services;
+
+namespace AlbonApp;
+
+public partial class App : Application
+{
+    public App(IAuthService authService)
+    {
+        InitializeComponent();
+        
+        // Check if user is logged in
+        MainPage = new AppShell();
+        
+        // Navigate to appropriate page
+        Task.Run(async () =>
+        {
+            var isLoggedIn = await authService.IsLoggedInAsync();
+            if (isLoggedIn)
+            {
+                await Shell.Current.GoToAsync("//dashboard");
+            }
+            else
+            {
+                await Shell.Current.GoToAsync("//login");
+            }
+        });
+    }
+}
+```
+
+## 🎯 Step 3: Enhanced Models with Validation
+
+### 3.1 Models/User.cs
+```csharp
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
+namespace AlbonApp.Models;
+
+public class User
+{
+    public int Id { get; set; }
+    
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = string.Empty;
+    
+    [JsonPropertyName("email")]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
+    
+    [JsonPropertyName("password")]
+    [MinLength(6)]
+    public string Password { get; set; } = string.Empty;
+    
+    [JsonPropertyName("created_at")]
+    public DateTime CreatedAt { get; set; }
+    
+    [JsonPropertyName("updated_at")]
+    public DateTime UpdatedAt { get; set; }
+}
+```
+
+### 3.2 Models/Device.cs
+```csharp
+using System.Text.Json.Serialization;
+
+namespace AlbonApp.Models;
+
+public class Device
+{
+    [JsonPropertyName("id")]
+    public int Id { get; set; }
+    
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = string.Empty;
+    
+    [JsonPropertyName("type")]
+    public DeviceType Type { get; set; }
+    
+    [JsonPropertyName("is_online")]
+    public bool IsOnline { get; set; }
+    
+    [JsonPropertyName("value")]
+    public double Value { get; set; }
+    
+    [JsonPropertyName("unit")]
+    public string Unit { get; set; } = string.Empty;
+    
+    [JsonPropertyName("last_updated")]
+    public DateTime LastUpdated { get; set; }
+    
+    [JsonPropertyName("status")]
+    public DeviceStatus Status { get; set; }
+}
+
+public enum DeviceType
+{
+    Blower,
+    Sensor,
+    Pump,
+    Heater,
+    Light
+}
+
+public enum DeviceStatus
+{
+    Online,
+    Offline,
+    Maintenance,
+    Error
+}
+```
+
+### 3.3 Models/SensorReading.cs
+```csharp
+using System.Text.Json.Serialization;
+
+namespace AlbonApp.Models;
+
+public class SensorReading
+{
+    [JsonPropertyName("id")]
+    public int Id { get; set; }
+    
+    [JsonPropertyName("temperature")]
+    public double Temperature { get; set; }
+    
+    [JsonPropertyName("ph")]
+    public double Ph { get; set; }
+    
+    [JsonPropertyName("moisture")]
+    public double Moisture { get; set; }
+    
+    [JsonPropertyName("watts")]
+    public double Watts { get; set; }
+    
+    [JsonPropertyName("timestamp")]
+    public DateTime Timestamp { get; set; }
+    
+    [JsonPropertyName("device_id")]
+    public int DeviceId { get; set; }
+}
+```
+
+## 🎯 Step 4: Enhanced Services with Error Handling
+
+### 4.1 Services/ApiService.cs - Production Ready
+```csharp
+using System.Net.Http.Json;
+using System.Text.Json;
+using AlbonApp.Models;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+
+namespace AlbonApp.Services;
+
+public interface IApiService
+{
+    Task<ApiResponse<User>> LoginAsync(string email, string password);
+    Task<ApiResponse<User>> SignupAsync(User user);
+    Task<ApiResponse<List<Device>>> GetDevicesAsync();
+    Task<ApiResponse<SensorReading>> GetLatestSensorDataAsync();
+    Task<ApiResponse<bool>> ToggleDeviceAsync(int deviceId, bool isOn);
+    Task<ApiResponse<List<SensorReading>>> GetSensorHistoryAsync(int hours = 24);
+}
+
+public class ApiService : IApiService
+{
+    private readonly HttpClient _httpClient;
+    private readonly ILogger<ApiService> _logger;
+    private readonly IConfiguration _configuration;
+    private readonly JsonSerializerOptions _jsonOptions;
+
+    public ApiService(HttpClient httpClient, ILogger<ApiService> logger, IConfiguration configuration)
+    {
+        _httpClient = httpClient;
+        _logger = logger;
+        _configuration = configuration;
+        
+        // Configure JSON options
+        _jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = true
+        };
+        
+        // Set base address
+        var baseUrl = _configuration["ApiSettings:BaseUrl"] ?? "https://api.albon.com/v1/";
+        _httpClient.BaseAddress = new Uri(baseUrl);
+        
+        // Set default headers
+        _httpClient.DefaultRequestHeaders.Add("User-Agent", "AlbonApp/1.0");
+    }
+
+    public async Task<ApiResponse<User>> LoginAsync(string email, string password)
+    {
+        try
+        {
+            _logger.LogInformation("Attempting login for user: {Email}", email);
+            
+            var loginData = new { email, password };
+            var response = await _httpClient.PostAsJsonAsync("auth/login", loginData, _jsonOptions);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<ApiResponse<User>>(content, _jsonOptions);
+                
+                _logger.LogInformation("Login successful for user: {Email}", email);
+                return result ?? new ApiResponse<User> { Success = false, Message = "Invalid response format" };
+            }
+            
+            var errorContent = await response.Content.ReadAsStringAsync();
+            _logger.LogWarning("Login failed for user: {Email}, Status: {Status}, Error: {Error}", 
+                email, response.StatusCode, errorContent);
+            
+            return new ApiResponse<User> 
+            { 
+                Success = false, 
+                Message = $"Login failed: {response.StatusCode}" 
+            };
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Network error during login for user: {Email}", email);
+            return new ApiResponse<User> 
+            { 
+                Success = false, 
+                Message = "Network error. Please check your connection." 
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error during login for user: {Email}", email);
+            return new ApiResponse<User> 
+            { 
+                Success = false, 
+                Message = "An unexpected error occurred." 
+            };
+        }
+    }
+
+    public async Task<ApiResponse<User>> SignupAsync(User user)
+    {
+        try
+        {
+            _logger.LogInformation("Attempting signup for user: {Email}", user.Email);
+            
+            var response = await _httpClient.PostAsJsonAsync("auth/signup", user, _jsonOptions);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<ApiResponse<User>>(content, _jsonOptions);
+                
+                _logger.LogInformation("Signup successful for user: {Email}", user.Email);
+                return result ?? new ApiResponse<User> { Success = false, Message = "Invalid response format" };
+            }
+            
+            var errorContent = await response.Content.ReadAsStringAsync();
+            _logger.LogWarning("Signup failed for user: {Email}, Status: {Status}, Error: {Error}", 
+                user.Email, response.StatusCode, errorContent);
+            
+            return new ApiResponse<User> 
+            { 
+                Success = false, 
+                Message = $"Signup failed: {response.StatusCode}" 
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during signup for user: {Email}", user.Email);
+            return new ApiResponse<User> 
+            { 
+                Success = false, 
+                Message = ex.Message 
+            };
+        }
+    }
+
+    public async Task<ApiResponse<List<Device>>> GetDevicesAsync()
+    {
+        try
+        {
+            _logger.LogInformation("Fetching devices");
+            
+            var response = await _httpClient.GetAsync("devices");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<ApiResponse<List<Device>>>(content, _jsonOptions);
+                
+                _logger.LogInformation("Successfully fetched {Count} devices", result?.Data?.Count ?? 0);
+                return result ?? new ApiResponse<List<Device>> { Success = false, Message = "Invalid response format" };
+            }
+            
+            return new ApiResponse<List<Device>> 
+            { 
+                Success = false, 
+                Message = "Failed to fetch devices" 
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching devices");
+            return new ApiResponse<List<Device>> 
+            { 
+                Success = false, 
+                Message = ex.Message 
+            };
+        }
+    }
+
+    public async Task<ApiResponse<SensorReading>> GetLatestSensorDataAsync()
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync("sensors/latest");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<ApiResponse<SensorReading>>(content, _jsonOptions);
+                return result ?? new ApiResponse<SensorReading> { Success = false, Message = "Invalid response format" };
+            }
+            
+            return new ApiResponse<SensorReading> 
+            { 
+                Success = false, 
+                Message = "Failed to fetch sensor data" 
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching sensor data");
+            return new ApiResponse<SensorReading> 
+            { 
+                Success = false, 
+                Message = ex.Message 
+            };
+        }
+    }
+
+    public async Task<ApiResponse<bool>> ToggleDeviceAsync(int deviceId, bool isOn)
+    {
+        try
+        {
+            var toggleData = new { deviceId, isOn };
+            var response = await _httpClient.PostAsJsonAsync("devices/toggle", toggleData, _jsonOptions);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                return new ApiResponse<bool> { Success = true, Data = true };
+            }
+            
+            return new ApiResponse<bool> 
+            { 
+                Success = false, 
+                Message = "Failed to toggle device" 
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error toggling device {DeviceId}", deviceId);
+            return new ApiResponse<bool> 
+            { 
+                Success = false, 
+                Message = ex.Message 
+            };
+        }
+    }
+
+    public async Task<ApiResponse<List<SensorReading>>> GetSensorHistoryAsync(int hours = 24)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"sensors/history?hours={hours}");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<ApiResponse<List<SensorReading>>>(content, _jsonOptions);
+                return result ?? new ApiResponse<List<SensorReading>> { Success = false, Message = "Invalid response format" };
+            }
+            
+            return new ApiResponse<List<SensorReading>> 
+            { 
+                Success = false, 
+                Message = "Failed to fetch sensor history" 
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching sensor history");
+            return new ApiResponse<List<SensorReading>> 
+            { 
+                Success = false, 
+                Message = ex.Message 
+            };
+        }
+    }
+}
+```
+
+## 🎯 Step 5: Configuration Management
+
+### 5.1 appsettings.json
+```json
+{
+  "ApiSettings": {
+    "BaseUrl": "https://api.albon.com/v1/",
+    "Timeout": 30,
+    "MaxRetries": 3
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "Features": {
+    "EnableOfflineMode": true,
+    "EnableRealTimeUpdates": true,
+    "DataRefreshInterval": 5000
+  }
+}
+```
+
+### 5.2 MauiProgram.cs - Enhanced DI Container
+```csharp
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using AlbonApp.Services;
+using AlbonApp.ViewModels;
+using AlbonApp.Views;
+using System.Reflection;
+
+namespace AlbonApp;
+
+public static class MauiProgram
+{
+    public static MauiApp CreateMauiApp()
+    {
+        var builder = MauiApp.CreateBuilder();
+        builder
+            .UseMauiApp<App>()
+            .ConfigureFonts(fonts =>
+            {
+                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+            });
+
+        // Add Configuration
+        var assembly = Assembly.GetExecutingAssembly();
+        using var stream = assembly.GetManifestResourceStream("AlbonApp.appsettings.json");
+        if (stream != null)
+        {
+            var config = new ConfigurationBuilder()
+                .AddJsonStream(stream)
+                .Build();
+            builder.Configuration.AddConfiguration(config);
+        }
+
+        // Add Logging
+        builder.Logging.AddDebug();
+
+        // Add HTTP Client
+        builder.Services.AddHttpClient<IApiService, ApiService>(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+
+        // Register Services
+        builder.Services.AddSingleton<IAuthService, AuthService>();
+        builder.Services.AddTransient<IApiService, ApiService>();
+
+        // Register ViewModels
+        builder.Services.AddTransient<LoginViewModel>();
+        builder.Services.AddTransient<SignupViewModel>();
+        builder.Services.AddTransient<DashboardViewModel>();
+
+        // Register Views
+        builder.Services.AddTransient<LoginPage>();
+        builder.Services.AddTransient<SignupPage>();
+        builder.Services.AddTransient<DashboardPage>();
+
+        return builder.Build();
+    }
+}
+```
+
+## 🎯 Step 6: Platform-Specific Configurations
+
+### 6.1 Android Configuration
+
+#### Platforms/Android/AndroidManifest.xml
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    
+    <application 
+        android:allowBackup="true" 
+        android:icon="@mipmap/appicon" 
+        android:supportsRtl="true"
+        android:usesCleartextTraffic="true">
+    </application>
+    
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+</manifest>
+```
+
+#### Platforms/Android/MainApplication.cs
+```csharp
+using Android.App;
+using Android.Runtime;
+
+namespace AlbonApp.Platforms.Android;
+
+[Application(UsesCleartextTraffic = true)]
+public class MainApplication : MauiApplication
+{
+    public MainApplication(IntPtr handle, JniHandleOwnership ownership)
+        : base(handle, ownership)
+    {
+    }
+
+    protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
+}
+```
+
+### 6.2 iOS Configuration
+
+#### Platforms/iOS/Info.plist
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+    <key>UIDeviceFamily</key>
+    <array>
+        <integer>1</integer>
+        <integer>2</integer>
+    </array>
+    <key>UIRequiredDeviceCapabilities</key>
+    <array>
+        <string>arm64</string>
+    </array>
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+    </dict>
+    <key>NSCameraUsageDescription</key>
+    <string>This app uses camera for scanning QR codes</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app uses location for device management</string>
+</dict>
+</plist>
+```
+
+## 🎯 Step 7: Enhanced UI Components
+
+### 7.1 Converters/ValueConverters.cs
+```csharp
+using System.Globalization;
+
+namespace AlbonApp.Converters;
+
+public class BoolToColorConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is bool isOnline)
+        {
+            return isOnline ? Colors.Green : Colors.Red;
+        }
+        return Colors.Gray;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class BoolToStatusConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is bool isOnline)
+        {
+            return isOnline ? "Online" : "Offline";
+        }
+        return "Unknown";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class DeviceTypeToImageConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is DeviceType deviceType)
+        {
+            return deviceType switch
+            {
+                DeviceType.Blower => "blower_icon.png",
+                DeviceType.Sensor => "sensor_icon.png",
+                DeviceType.Pump => "pump_icon.png",
+                DeviceType.Heater => "heater_icon.png",
+                DeviceType.Light => "light_icon.png",
+                _ => "device_icon.png"
+            };
+        }
+        return "device_icon.png";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+```
+
+### 7.2 Resources/Styles/Styles.xaml
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                    xmlns:converters="clr-namespace:AlbonApp.Converters">
+
+    <!-- Converters -->
+    <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
+    <converters:BoolToStatusConverter x:Key="BoolToStatusConverter" />
+    <converters:DeviceTypeToImageConverter x:Key="DeviceTypeToImageConverter" />
+
+    <!-- Button Styles -->
+    <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="HeightRequest" Value="50" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{StaticResource Primary}" />
+        <Setter Property="BorderColor" Value="{StaticResource Primary}" />
+        <Setter Property="BorderWidth" Value="2" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="HeightRequest" Value="50" />
+        <Setter Property="FontSize" Value="16" />
+    </Style>
+
+    <!-- Frame Styles -->
+    <Style x:Key="CardFrameStyle" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="White" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="HasShadow" Value="True" />
+        <Setter Property="Padding" Value="20" />
+    </Style>
+
+    <!-- Entry Styles -->
+    <Style x:Key="DefaultEntryStyle" TargetType="Entry">
+        <Setter Property="BackgroundColor" Value="#F8F9FA" />
+        <Setter Property="TextColor" Value="#333" />
+        <Setter Property="PlaceholderColor" Value="#999" />
+        <Setter Property="HeightRequest" Value="50" />
+        <Setter Property="FontSize" Value="16" />
+    </Style>
+
+    <!-- Label Styles -->
+    <Style x:Key="TitleLabelStyle" TargetType="Label">
+        <Setter Property="FontSize" Value="24" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="{StaticResource PrimaryDark}" />
+    </Style>
+
+    <Style x:Key="SubtitleLabelStyle" TargetType="Label">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="TextColor" Value="#666" />
+    </Style>
+
+    <!-- Sensor Card Style -->
+    <Style x:Key="SensorCardStyle" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="White" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="HasShadow" Value="True" />
+        <Setter Property="Padding" Value="15" />
+        <Setter Property="Margin" Value="5" />
+    </Style>
+
+</ResourceDictionary>
+```
+
+## 🎯 Step 8: Build and Deployment Configuration
+
+### 8.1 Updated AlbonApp.csproj for Production
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
+        <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
+        
+        <!-- Output Configuration -->
+        <OutputType>Exe</OutputType>
+        <RootNamespace>AlbonApp</RootNamespace>
+        <UseMaui>true</UseMaui>
+        <SingleProject>true</SingleProject>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <!-- App Information -->
+        <ApplicationTitle>Albon IoT</ApplicationTitle>
+        <ApplicationId>com.albon.iotapp</ApplicationId>
+        <ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
+        <ApplicationVersion>1</ApplicationVersion>
+
+        <!-- Platform Support -->
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+        <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+        
+        <!-- Android Specific -->
+        <AndroidPackageFormat>apk</AndroidPackageFormat>
+        <AndroidUseAapt2>true</AndroidUseAapt2>
+        <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
+    </PropertyGroup>
+
+    <!-- Release Configuration -->
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <AndroidLinkMode>SdkOnly</AndroidLinkMode>
+        <AndroidLinkSkip />
+        <AndroidLinkTool>r8</AndroidLinkTool>
+        <AndroidEnableMultiDex>true</AndroidEnableMultiDex>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- App Icon -->
+        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#4CAF50" />
+
+        <!-- Splash Screen -->
+        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#4CAF50" BaseSize="128,128" />
+
+        <!-- Images -->
+        <MauiImage Include="Resources\Images\*" />
+
+        <!-- Custom Fonts -->
+        <MauiFont Include="Resources\Fonts\*" />
+
+        <!-- Raw Assets -->
+        <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+
+        <!-- Configuration Files -->
+        <EmbeddedResource Include="appsettings.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- Core Packages -->
+        <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+        <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
+        
+        <!-- HTTP and JSON -->
+        <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+        <PackageReference Include="System.Text.Json" Version="8.0.0" />
+        
+        <!-- MVVM and Configuration -->
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+        
+        <!-- Optional: Charts and UI -->
+        <PackageReference Include="Syncfusion.Maui.Charts" Version="23.2.7" />
+        <PackageReference Include="CommunityToolkit.Maui" Version="7.0.1" />
+    </ItemGroup>
+
+</Project>
+```
+
+## 🎯 Step 9:
